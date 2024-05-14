@@ -26,21 +26,21 @@ function addTodo() {
 
 // PUT/PATCH REQUEST
 function updateTodo() {
-    // console.log("PUT Request");
- const updatedTodo = {
+  // console.log("PUT Request");
+  const updatedTodo = {
     title: "patch  Todo",
     completed: false,
   };
-  // put replaces data 
-// axios.put(baseURL + "1", updatedTodo)
-// .then((res) => showOutput(res))
-// .catch((err) => console.error(err.message));
+  // put replaces data
+  // axios.put(baseURL + "1", updatedTodo)
+  // .then((res) => showOutput(res))
+  // .catch((err) => console.error(err.message));
 
-// patch modifyies data
-axios.patch(baseURL + "1", updatedTodo)
-.then((res) => showOutput(res))
-.catch((err) => console.error(err));
-
+  // patch modifyies data
+  axios
+    .patch(baseURL + "1", updatedTodo)
+    .then((res) => showOutput(res))
+    .catch((err) => console.error(err));
 }
 
 // DELETE REQUEST
@@ -49,15 +49,19 @@ function removeTodo() {
     .delete(baseURL + "1")
     .then((res) => showOutput(res))
     .catch((err) => console.error(err.message));
-  
 }
 
 // SIMULTANEOUS DATA
-function getData() {
-  axios.all([
-    axios.get(baseURL),
-    
-  ])
+async function getData() {
+  const getDataURL = `${baseURL}both`;
+  const response = await axios
+    .get(getDataURL)
+    .then((res) => {
+      const postsNtodos = { todos: res.data.posts, posts: res.data.todos };
+      console.log(postsNtodos);
+      showOutput(res); // if i pass postNtodos in showOutput it gives me undefined??
+    })
+    .catch((error) => console.error(error.message));
 }
 
 // CUSTOM HEADERS
@@ -81,6 +85,19 @@ function cancelToken() {
 }
 
 // INTERCEPTING REQUESTS & RESPONSES
+axios.interceptors.request.use(
+  (config) => {
+    console.log(
+      `${config.method.toUpperCase()} request sent to ${
+        config.url
+      } at ${new Date().toTimeString()}`
+    );
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // AXIOS INSTANCES
 
@@ -126,9 +143,7 @@ document.getElementById("post").addEventListener("click", addTodo);
 document.getElementById("update").addEventListener("click", updateTodo);
 document.getElementById("delete").addEventListener("click", removeTodo);
 document.getElementById("sim").addEventListener("click", getData);
-document.getElementById("headers").addEventListener("click", customHeaders);
-document
-  .getElementById("transform")
-  .addEventListener("click", transformResponse);
+// document.getElementById("headers").addEventListener("click", customHeaders);
+// document.getElementById("transform").addEventListener("click", transformResponse);
 document.getElementById("error").addEventListener("click", errorHandling);
-document.getElementById("cancel").addEventListener("click", cancelToken);
+// document.getElementById("cancel").addEventListener("click", cancelToken);

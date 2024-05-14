@@ -20,7 +20,6 @@ app.get("/", async (req, res) => {
     // console.log(todos);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -28,12 +27,18 @@ app.get("/", async (req, res) => {
 app.post("/", (req, res) => {
   try {
     const newTodo = req.body; // Get the input from the front-end data
-    axios.post(todosURL, newTodo).then((response) => {
-      res.status(201).send(response.data);
-    });
+    axios
+      .post(todosURL, newTodo)
+      .then((response) => {
+        res.status(201).send(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(error.message);
+      });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send(error.message);
   }
 });
 // main url with todo with an addioton of dynamic userId to updated or put
@@ -44,10 +49,13 @@ app.put("/:userId", (req, res) => {
       .put(todosURL + `/${req.params.userId}`, updatedTodo)
       .then((response) => {
         res.status(200).send(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(error.message);
       });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -59,34 +67,62 @@ app.patch("/:userId", (req, res) => {
       .patch(todosURL + `/${req.params.userId}`, updatedTodo)
       .then((response) => {
         res.status(200).send(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(error.message);
       });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
   }
 });
 
 // delete the todo
 app.delete("/:userId", (req, res) => {
-  axios.delete(todosURL + `/${req.params.userId}`)
-  .then((response) => {
-    res.status(200).send(response.data);
-  });
+  axios
+    .delete(todosURL + `/${req.params.userId}`)
+    .then((response) => {
+      res.status(200).send(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(error.message);
+    });
 });
 
+//  get posts and todos simultaneously
+app.get("/both", async (req, res) => {
+  try {
+    const reposne = await axios
+      .all([
+        axios.get(todosURL, { params: { _limit: 5 } }),
+        axios.get(postsURL, { params: { _limit: 5 } }),
+      ])
+      .then(
+        axios.spread((todos, posts) => {
+          res.status(200).send({ todos: todos.data, posts: posts.data });
+        })
+      )
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(error.message);
+      });
+  } catch (error) {
+    console.error(error.message);
+  }
+});
 
-// app.all("/secret, (req, res, next) => {
-//   axios.all([
-//     axios.get(todosURL),
-//     axios.get(postsURL)
-//   ]).then(axios.spread((todos, posts) => {
-//     res.status(200).send({todos: todos.data, posts: posts.data});
-//   })).catch((error) => {
-//     console.error(error);
-//     res.status(500).send("Internal Server Error");
-//   })
-// });
-// });
+//server interceptor or logger
+axios.interceptors.request.use(
+  config =>{
+    console.log(`${config.method.toUpperCase()} request sent to ${config.url} at ${new Date().toTimeString()}`);
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+)
+
 
 app.use("/static", express.static(path.join(__dirname, "public")));
 // catchall this can not be at the top of the server
