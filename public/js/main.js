@@ -28,28 +28,36 @@ function addTodo() {
 function updateTodo() {
     // console.log("PUT Request");
  const updatedTodo = {
-    title: "Updated Todo",
-    completed: true,
+    title: "patch  Todo",
+    completed: false,
   };
-axios.put(baseURL + "1", updatedTodo)
+  // put replaces data 
+// axios.put(baseURL + "1", updatedTodo)
+// .then((res) => showOutput(res))
+// .catch((err) => console.error(err.message));
+
+// patch modifyies data
+axios.patch(baseURL + "1", updatedTodo)
 .then((res) => showOutput(res))
 .catch((err) => console.error(err));
-
-
-// axios.patch(todosURL + "/1", updatedTodo)
-// .then((res) => showOutput(res))
-// .catch((err) => console.error(err));
 
 }
 
 // DELETE REQUEST
 function removeTodo() {
-  console.log("DELETE Request");
+  axios
+    .delete(baseURL + "1")
+    .then((res) => showOutput(res))
+    .catch((err) => console.error(err.message));
+  
 }
 
 // SIMULTANEOUS DATA
 function getData() {
-  console.log("Simultaneous Request");
+  axios.all([
+    axios.get(baseURL),
+    
+  ])
 }
 
 // CUSTOM HEADERS

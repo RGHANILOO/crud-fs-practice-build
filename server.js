@@ -7,8 +7,8 @@ const cors = require("cors");
 const todosURL = "https://jsonplaceholder.typicode.com/todos";
 const postsURL = "https://jsonplaceholder.typicode.com/posts";
 
-app.use(cors());//allow the cross origin request
-app.use(express.json());//handle the data in json format
+app.use(cors()); //allow the cross origin request
+app.use(express.json()); //handle the data in json format
 
 //get the todos from the server
 app.get("/", async (req, res) => {
@@ -36,31 +36,57 @@ app.post("/", (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-app.put("/", (req, res) => {
+// main url with todo with an addioton of dynamic userId to updated or put
+app.put("/:userId", (req, res) => {
   try {
     const updatedTodo = req.body;
-    axios.put(todosURL + `/${req.params.userId}`, updatedTodo).then((response) => {
-      res.status(200).send(response.data);
-    });
-    
+    axios
+      .put(todosURL + `/${req.params.userId}`, updatedTodo)
+      .then((response) => {
+        res.status(200).send(response.data);
+      });
   } catch (error) {
-    
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
-app.update
-app.delete("/user", (req, res) => {
-  res.send("Got a DELETE request at /user");
+
+// patch to update the todo
+app.patch("/:userId", (req, res) => {
+  try {
+    const updatedTodo = req.body;
+    axios
+      .patch(todosURL + `/${req.params.userId}`, updatedTodo)
+      .then((response) => {
+        res.status(200).send(response.data);
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-app.get("/users/:userId/books/:bookId", (req, res) => {
-  res.send(req.params);
+// delete the todo
+app.delete("/:userId", (req, res) => {
+  axios.delete(todosURL + `/${req.params.userId}`)
+  .then((response) => {
+    res.status(200).send(response.data);
+  });
 });
 
-app.all("/secret", (req, res, next) => {
-  console.log("accesing the secret section");
-  next();
-});
+
+// app.all("/secret, (req, res, next) => {
+//   axios.all([
+//     axios.get(todosURL),
+//     axios.get(postsURL)
+//   ]).then(axios.spread((todos, posts) => {
+//     res.status(200).send({todos: todos.data, posts: posts.data});
+//   })).catch((error) => {
+//     console.error(error);
+//     res.status(500).send("Internal Server Error");
+//   })
+// });
+// });
 
 app.use("/static", express.static(path.join(__dirname, "public")));
 // catchall this can not be at the top of the server
