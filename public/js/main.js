@@ -1,68 +1,148 @@
+
+
 const baseURL = "http://localhost:4242/";
-// const todosURL = "https://jsonplaceholder.typicode.com/todos";
 
 // AXIOS GLOBALS
-axios.defaults.baseURL = baseURL;
+
+
+// Generic function to handle requests
+async function handleRequest(method, url,data = null) {
+  try {
+    const response = await axios(method,url, data);
+    return response.data;
+  } catch (error) {
+    console.error(error.message);
+    throw new Error("Request failed.");
+  }
+}
 
 // GET REQUEST
-function getTodos() {
-  axios
-    .get(baseURL)
-    .then((res) => showOutput(res))
-    .catch((err) => console.error(err.message));
+async function fetchTodos() {
+  try {
+    const response = await handleRequest("get",`${baseURL}todos`);
+    showOutput(response);
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 // POST REQUEST
-function addTodo() {
-  const newTodo = {
-    title: "is this a new todo?",
-    completed: false,
-  };
-  axios
-    .post(baseURL, newTodo)
-    .then((res) => showOutput(res))
-    .catch((err) => console.error(err.message));
+async function addTodo() {
+  try {
+    const newTodo = {
+      title: "is this a new todo?",
+      completed: false,
+    };
+    const response = await handleRequest("post", baseURL, newTodo);
+    showOutput(response);
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 // PUT/PATCH REQUEST
-function updateTodo() {
-  // console.log("PUT Request");
-  const updatedTodo = {
-    title: "patch  Todo",
-    completed: false,
-  };
-  // put replaces data
-  // axios.put(baseURL + "1", updatedTodo)
-  // .then((res) => showOutput(res))
-  // .catch((err) => console.error(err.message));
-
-  // patch modifyies data
-  axios
-    .patch(baseURL + "1", updatedTodo)
-    .then((res) => showOutput(res))
-    .catch((err) => console.error(err));
+async function updateTodo() {
+  try {
+    const updatedTodo = {
+      title: "patch  Todo",
+      completed: false,
+    };
+    const response = await handleRequest("patch", baseURL + "1", updatedTodo);
+    showOutput(response);
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 // DELETE REQUEST
-function removeTodo() {
-  axios
-    .delete(baseURL + "1")
-    .then((res) => showOutput(res))
-    .catch((err) => console.error(err.message));
+async function deleteTodo() {
+  try {
+    const response = await handleRequest("delete", baseURL + "1");
+    showOutput(response);
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 // SIMULTANEOUS DATA
-async function getData() {
-  const getDataURL = `${baseURL}both`;
-  const response = await axios
-    .get(getDataURL)
-    .then((res) => {
-      const postsNtodos = { todos: res.data.posts, posts: res.data.todos };
-      console.log(postsNtodos);
-      showOutput(res); // if i pass postNtodos in showOutput it gives me undefined??
-    })
-    .catch((error) => console.error(error.message));
+async function fetchData() {
+  try {
+    const getDataURL = `${baseURL}both`;
+    const response = await handleRequest("get", getDataURL);
+    const postsNtodos = { todos: response.data.posts, posts: response.data.todos };
+    console.log(postsNtodos);
+    showOutput(response);
+  } catch (error) {
+    console.error(error.message);
+  }
 }
+
+
+// const baseURL = "http://localhost:4242/";
+
+
+// // AXIOS GLOBALS
+// axios.defaults.baseURL = baseURL;
+
+// // GET REQUEST
+// function getTodos() {
+//   axios
+//     .get(baseURL)
+//     .then((res) => showOutput(res))
+//     .catch((err) => console.error(err.message));
+// }
+
+// // POST REQUEST
+// function addTodo() {
+//   const newTodo = {
+//     title: "is this a new todo?",
+//     completed: false,
+//   };
+//   axios
+//     .post(baseURL, newTodo)
+//     .then((res) => showOutput(res))
+//     .catch((err) => console.error(err.message));
+// }
+
+// // PUT/PATCH REQUEST
+// function updateTodo() {
+//   // console.log("PUT Request");
+//   const updatedTodo = {
+//     title: "patch  Todo",
+//     completed: false,
+//   };
+//   // put replaces data
+//   // axios.put(baseURL + "1", updatedTodo)
+//   // .then((res) => showOutput(res))
+//   // .catch((err) => console.error(err.message));
+
+//   // patch modifyies data
+//   axios
+//     .patch(baseURL + "1", updatedTodo)
+//     .then((res) => showOutput(res))
+//     .catch((err) => console.error(err));
+// }
+
+// // DELETE REQUEST
+// function removeTodo() {
+//   axios
+//     .delete(baseURL + "1")
+//     .then((res) => showOutput(res))
+//     .catch((err) => console.error(err.message));
+// }
+
+// // SIMULTANEOUS DATA
+// async function getData() {
+//   const getDataURL = `${baseURL}both`;
+//   const response = await axios
+//     .get(getDataURL)
+//     .then((res) => {
+//       const postsNtodos = { todos: res.data.posts, posts: res.data.todos };
+//       console.log(postsNtodos);
+//       showOutput(res); // if i pass postNtodos in showOutput it gives me undefined??
+//     })
+//     .catch((error) => console.error(error.message));
+// }
 
 // CUSTOM HEADERS
 function customHeaders() {
@@ -138,12 +218,16 @@ function showOutput(res) {
 }
 
 // Event listeners
-document.getElementById("get").addEventListener("click", getTodos);
+// document.getElementById("get").addEventListener("click", getTodos);
+// document.getElementById("post").addEventListener("click", addTodo);
+// document.getElementById("update").addEventListener("click", updateTodo);
+// document.getElementById("delete").addEventListener("click", removeTodo);
+// document.getElementById("sim").addEventListener("click", getData);
+// document.getElementById("error").addEventListener("click", errorHandling);
+
+document.getElementById("get").addEventListener("click", fetchTodos);
 document.getElementById("post").addEventListener("click", addTodo);
 document.getElementById("update").addEventListener("click", updateTodo);
-document.getElementById("delete").addEventListener("click", removeTodo);
-document.getElementById("sim").addEventListener("click", getData);
-// document.getElementById("headers").addEventListener("click", customHeaders);
-// document.getElementById("transform").addEventListener("click", transformResponse);
+document.getElementById("delete").addEventListener("click", deleteTodo);
+document.getElementById("sim").addEventListener("click", fetchData);
 document.getElementById("error").addEventListener("click", errorHandling);
-// document.getElementById("cancel").addEventListener("click", cancelToken);
