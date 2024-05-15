@@ -4,6 +4,7 @@ const path = require("path");
 const axios = require("axios");
 const port = 4242;
 const cors = require("cors");
+const logger = require("./middlewares/logger");
 const todosURL = "https://jsonplaceholder.typicode.com/todos";
 const postsURL = "https://jsonplaceholder.typicode.com/posts";
 
@@ -11,7 +12,7 @@ app.use(cors()); //allow the cross origin request
 app.use(express.json()); //handle the data in json format
 
 //get the todos from the server
-app.get("/", async (req, res) => {
+app.get("/",logger, async (req, res) => {
   try {
     const response = await axios.get(todosURL, { params: { _limit: 5 } });
     const todos = response.data;
@@ -24,7 +25,7 @@ app.get("/", async (req, res) => {
 });
 
 // post the todos to the server
-app.post("/", (req, res) => {
+app.post("/",logger, (req, res) => {
   try {
     const newTodo = req.body; // Get the input from the front-end data
     axios
@@ -123,6 +124,7 @@ axios.interceptors.request.use(
   }
 )
 
+app.use(logger);
 
 app.use("/static", express.static(path.join(__dirname, "public")));
 // catchall this can not be at the top of the server
