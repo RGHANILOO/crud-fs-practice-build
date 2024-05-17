@@ -1,26 +1,10 @@
-
-
 const baseURL = "http://localhost:4242/";
-
-// AXIOS GLOBALS
-
-
-// Generic function to handle requests
-async function handleRequest(method, url,data = null) {
-  try {
-    const response = await axios(method,url, data);
-    return response.data;
-  } catch (error) {
-    console.error(error.message);
-    throw new Error("Request failed.");
-  }
-}
 
 // GET REQUEST
 async function fetchTodos() {
   try {
-    const response = await handleRequest("get",`${baseURL}todos`);
-    showOutput(response);
+    const res = await axios.get(baseURL + "todos");
+    showOutput(res);
   } catch (error) {
     console.error(error.message);
   }
@@ -33,7 +17,7 @@ async function addTodo() {
       title: "is this a new todo?",
       completed: false,
     };
-    const response = await handleRequest("post", baseURL, newTodo);
+    const response = await axios.post(baseURL + "todos", newTodo);
     showOutput(response);
   } catch (error) {
     console.error(error.message);
@@ -47,7 +31,7 @@ async function updateTodo() {
       title: "patch  Todo",
       completed: false,
     };
-    const response = await handleRequest("patch", baseURL + "1", updatedTodo);
+    const response = await axios.put(`${baseURL}todos/1`, updatedTodo);
     showOutput(response);
   } catch (error) {
     console.error(error.message);
@@ -69,7 +53,10 @@ async function fetchData() {
   try {
     const getDataURL = `${baseURL}both`;
     const response = await handleRequest("get", getDataURL);
-    const postsNtodos = { todos: response.data.posts, posts: response.data.todos };
+    const postsNtodos = {
+      todos: response.data.posts,
+      posts: response.data.todos,
+    };
     console.log(postsNtodos);
     showOutput(response);
   } catch (error) {
@@ -77,9 +64,7 @@ async function fetchData() {
   }
 }
 
-
 // const baseURL = "http://localhost:4242/";
-
 
 // // AXIOS GLOBALS
 // axios.defaults.baseURL = baseURL;

@@ -5,109 +5,153 @@ const axios = require("axios");
 const port = 4242;
 const cors = require("cors");
 const logger = require("./middlewares/logger");
-const fetchWrapper = require("./fetchWrapper");
+const HttpService = require("./httpservices");
 
 app.use(cors()); //allow the cross origin request
 app.use(express.json()); //handle the data in json format
+app.use(express.urlencoded({ extended: false })); //handle the data in urlencoded format
 
-// Get todos with limit of 5 (default)
-app.get("/todos", logger, async (req, res) => {
+const httpService = new HttpService("https://jsonplaceholder.typicode.com");
+
+// get the todos from the server
+app.get("/todos", async (req, res) => {
   try {
-    const todos = await fetchWrapper.getTodos({
-      params: { _limit: req.query.limit || 5 },
-    });
-    res.status(200).send(todos);
+    const todos = await httpService.get("/todos");
+
+    res.status(200).json(todos);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching todos");
+    res.status(500).send(error.message);
   }
 });
 
-// Get a single todo by ID
-app.get("/todos/:id", logger, async (req, res) => {
-  try {
-    const todoId = req.params.id;
-    const todo = await fetchWrapper.getTodo(todoId); // Assuming a getTodo method in FetchWrapper
-    res.status(200).send(todo);
-  } catch (error) {
-    console.error(error);
-    res.status(404).send("Todo not found"); // Consider a specific error code for "not found"
-  }
-});
-
-// Post a new todo
-app.post("/todos", logger, async (req, res) => {
+// post the todos to the server
+app.post("/todos", async (req, res) => {
   try {
     const newTodo = req.body;
-    const createdTodo = await fetchWrapper.postTodo(newTodo);
-    res.status(201).send(createdTodo);
+    const createdTodo = await httpService.post("/todos", newTodo);
+    res.status(201).json(createdTodo);
+    
   } catch (error) {
     console.error(error);
-    res.status(400).send("Error creating todo"); // Consider a specific error code for "bad request"
+    res.status(400).send(error.message);
+    
   }
 });
+
+// update the todo by id put & patch
+app.put("/todos/:userId", async(req, res)=>{
+  try {
+    const updatedTodo = req.body;
+    const updatedTodoId = req.params.userId;
+    const updatedTodoData = await httpService.put(`/todos/${updatedTodoId}`, updatedTodo);
+    res.status(200).json(updatedTodoData);
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).send(error.message);
+    
+  }
+})
+
+// Get todos with limit of 5 (default)
+// app.get("/todos", logger, async (req, res) => {
+//   try {
+//     const todos = await fetchWrapper.getTodos({
+//       params: { _limit: req.query.limit || 5 },
+//     });
+//     res.status(200).json(todos);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error fetching todos");
+//   }
+// });
+
+// Get a single todo by ID
+// app.get("/todos/:id", logger, async (req, res) => {
+//   try {
+//     const todoId = req.params.id;
+//     const todo = await fetchWrapper.getTodo(todoId); // Assuming a getTodo method in FetchWrapper
+//     res.status(200).send(todo);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(404).send("Todo not found"); // Consider a specific error code for "not found"
+//   }
+// });
+
+// Post a new todo
+// app.post("/todos", logger, async (req, res) => {
+//   try {
+//     const newTodo = req.body;
+//     const createdTodo = await fetchWrapper.postTodo(newTodo);
+//     res.status(201).send(createdTodo);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).send("Error creating todo"); // Consider a specific error code for "bad request"
+//   }
+// });
 
 // Update a todo by ID (assuming PUT for full update)
-app.put("/todos/:id", logger, async (req, res) => {
-  try {
-    const todoId = req.params.id;
-    const updatedTodo = req.body;
-    await fetchWrapper.putTodo(todoId, updatedTodo);
-    res.status(200).send("Todo updated successfully"); // Or send the updated data
-  } catch (error) {
-    console.error(error);
-    res.status(400).send("Error updating todo"); // Consider a specific error code for "bad request"
-  }
-});
+// app.put("/todos/:id", logger, async (req, res) => {
+//   try {
+//     const todoId = req.params.id;
+//     const updatedTodo = req.body;
+//     await fetchWrapper.putTodo(todoId, updatedTodo);
+//     res.status(200).send("Todo updated successfully"); // Or send the updated data
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).send("Error updating todo"); // Consider a specific error code for "bad request"
+//   }
+// });
 
 // Patch a todo by ID (assuming PATCH for partial update)
-app.patch("/todos/:id", logger, async (req, res) => {
-  try {
-    const todoId = req.params.id;
-    const updatedTodo = req.body;
-    await fetchWrapper.patchTodo(todoId, updatedTodo);
-    res.status(200).send("Todo patched successfully"); // Or send the patched data
-  } catch (error) {
-    console.error(error);
-    res.status(400).send("Error patching todo"); // Consider a specific error code for "bad request"
-  }
-});
+// app.patch("/todos/:id", logger, async (req, res) => {
+//   try {
+//     const todoId = req.params.id;
+//     const updatedTodo = req.body;
+//     await fetchWrapper.patchTodo(todoId, updatedTodo);
+//     res.status(200).send("Todo patched successfully"); // Or send the patched data
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).send("Error patching todo"); // Consider a specific error code for "bad request"
+//   }
+// });
 
 // Delete a todo by ID
-app.delete("/todos/:id", logger, async (req, res) => {
-  try {
-    const todoId = req.params.id;
-    await fetchWrapper.deleteTodo(todoId);
-    res.status(200).send("Todo deleted successfully");
-  } catch (error) {
-    console.error(error);
-    res.status(404).send("Todo not found"); // Consider a specific error code for "not found"
-  }
-});
+// app.delete("/todos/:id", logger, async (req, res) => {
+//   try {
+//     const todoId = req.params.id;
+//     await fetchWrapper.deleteTodo(todoId);
+//     res.status(200).send("Todo deleted successfully");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(404).send("Todo not found"); // Consider a specific error code for "not found"
+//   }
+// });
 
 // Get all posts (assuming a separate endpoint for posts)
-app.get("/posts", logger, async (req, res) => {
-  try {
-    const posts = await fetchWrapper.getPosts({
-      params: { _limit: req.query.limit || 5 },
-    });
-    res.status(200).send(posts);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error fetching posts");
-  }
-});
+// app.get("/posts", logger, async (req, res) => {
+//   try {
+//     const posts = await fetchWrapper.getPosts({
+//       params: { _limit: req.query.limit || 5 },
+//     });
+//     res.status(200).send(posts);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error fetching posts");
+//   }
+// });
 
 // Get a single post by ID (assuming a getPosts method in FetchWrapper)
-app.get("/posts/:id", logger, async (req, res) => {
-  try {
-    const postId = req.params.id;
-    const post = await fetchWrapper.getPost(postId); // Assuming a getPost method in FetchWrapper
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error fetching posts");
-  }
-});
+// app.get("/posts/:id", logger, async (req, res) => {
+//   try {
+//     const postId = req.params.id;
+//     const post = await fetchWrapper.getPost(postId); // Assuming a getPost method in FetchWrapper
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error fetching posts");
+//   }
+// });
 // //get the todos from the server
 // app.get("/",logger, async (req, res) => {
 //   try {
@@ -227,7 +271,8 @@ axios.interceptors.request.use(
 
 app.use(logger);
 
-app.use("/static", express.static(path.join(__dirname, "public")));
+// app.use("/static", express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 // catchall this can not be at the top of the server
 // app.use((req, res) => {
 //   res.status(404).send("Page not found");
